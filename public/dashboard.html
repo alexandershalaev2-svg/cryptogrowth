@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет | CryptoGrowth</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo">CryptoGrowth</div>
+        <div class="user-info">
+            <span id="user-email"></span>
+            <button onclick="logout()" class="btn-small">Выйти</button>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="balance-card">
+            <h2>Доступный баланс</h2>
+            <h1 id="user-balance">$0.00</h1>
+            <p>Общий заработок: <span id="user-profit">$0.00</span></p>
+            <div class="actions">
+                <button class="btn-primary" onclick="showDepositModal()">Пополнить</button>
+                <button class="btn-secondary" onclick="showWithdrawModal()">Вывести</button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3>Активные планы</h3>
+                <p id="active-plans-count" style="font-size: 2rem; color: #00fff7; margin-top: 10px;">0</p>
+            </div>
+            <div class="stat-box">
+                <h3>Реферальный код</h3>
+                <p id="referral-code" style="font-family: monospace; font-size: 1.2em; color: #e94560; margin-top: 10px;">N/A</p>
+                <button class="btn-small" style="margin-top: 10px;" onclick="copyReferral()">Копировать</button>
+            </div>
+        </div>
+
+        <h3>Мои инвестиции</h3>
+        <div id="investments-list" class="investments-list">
+            <p style="color: #a0a0c0;">Загрузка...</p>
+        </div>
+        
+        <h3>История транзакций</h3>
+        <table class="transactions-table">
+            <thead>
+                <tr>
+                    <th>Тип</th>
+                    <th>Сумма</th>
+                    <th>Дата</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody id="transactions-body">
+                <tr><td colspan="4" style="text-align:center; color:#a0a0c0;">Загрузка...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="deposit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('deposit-modal')">&times;</span>
+            <h2>Пополнение в BTC</h2>
+            <p>Отправьте BTC на адрес ниже:</p>
+            <div class="wallet-address">364MXZqZRGd8Bsnkssv93S2qd4WL5mZc5U</div>
+            <button class="btn-small" onclick="copyWallet()" style="width: 100%; margin-bottom: 20px;">📋 Копировать BTC адрес</button>
+            <div style="background: #0a0a1a; border: 1px solid rgba(233,69,96,0.3); border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center;">
+                <p style="color: #e94560; font-weight: 600; margin-bottom: 8px;">⚠️ Только BTC (Bitcoin Network)</p>
+                <p style="color: #a0a0c0; font-size: 0.85rem;">Не отправляйте BTC с бирж — используйте личный кошелёк</p>
+            </div>
+            <form id="deposit-form">
+                <input type="number" id="deposit-amount" placeholder="Сумма в USD ($)" min="100" step="0.01" required>
+                <div id="btc-calculated" style="background: #0a0a1a; border: 1px solid rgba(247,147,26,0.3); border-radius: 8px; padding: 12px; margin-bottom: 15px; text-align: center; display: none;">
+                    <p style="color: #a0a0c0; font-size: 0.85rem; margin-bottom: 4px;">Отправьте ровно:</p>
+                    <p id="btc-amount-display" style="color: #f7931a; font-family: monospace; font-size: 1.2rem; font-weight: 700;">—</p>
+                    <p id="btc-price-display" style="color: #a0a0c0; font-size: 0.75rem; margin-top: 4px;">Загрузка курса BTC...</p>
+                </div>
+                <select id="deposit-plan" required>
+                    <option value="">Выберите план</option>
+                    <option value="Starter">Starter — 0.3%/день (30 дней)</option>
+                    <option value="Pro">Pro Trader — 0.7%/день (60 дней)</option>
+                    <option value="VIP">VIP Whale — 1.2%/день (90 дней)</option>
+                </select>
+                <input type="text" id="tx-hash" placeholder="BTC TX Hash (подтвердите после отправки)" required>
+                <div id="tx-verify-status" style="margin-bottom: 15px; text-align: center; display: none;"></div>
+                <button type="submit" class="btn-primary full-width" id="submit-deposit-btn" disabled>✅ Подтвердить депозит</button>
+            </form>
+            <p id="deposit-msg" style="text-align: center; margin-top: 15px; color: #e94560;"></p>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdraw-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('withdraw-modal')">&times;</span>
+            <h2>Вывод в BTC</h2>
+            <p>Доступно: <span id="withdraw-available" style="color: #00fff7;"></span></p>
+            <div style="background: #0a0a1a; border: 1px solid rgba(0,255,247,0.2); border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;">
+                <p style="color: #00fff7; font-size: 0.85rem;">Вывод осуществляется в BTC по курсу на момент обработки</p>
+            </div>
+            <form id="withdraw-form">
+                <input type="number" id="withdraw-amount" placeholder="Сумма вывода ($)" min="10" step="0.01" required>
+                <input type="text" id="withdraw-wallet" placeholder="BTC адрес кошелька" required>
+                <button type="submit" class="btn-secondary full-width">🚀 Запросить вывод</button>
+            </form>
+            <p id="withdraw-msg" style="text-align: center; margin-top: 15px; color: #e94560;"></p>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        // ===== BTC REAL-TIME PRICE & DEPOSIT VERIFICATION =====
+        let btcPriceUSD = 0;
+        let btcVerified = false;
+
+        // Fetch real BTC price from CoinGecko API
+        async function fetchBTCPrice() {
+            try {
+                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+                const data = await res.json();
+                btcPriceUSD = data.bitcoin.usd;
+                
+                const priceDisplay = document.getElementById('btc-price-display');
+                if (priceDisplay) {
+                    priceDisplay.textContent = `1 BTC = $${btcPriceUSD.toLocaleString()} USD`;
+                }
+                return btcPriceUSD;
+            } catch (err) {
+                console.error('Failed to fetch BTC price:', err);
+                const priceDisplay = document.getElementById('btc-price-display');
+                if (priceDisplay) {
+                    priceDisplay.textContent = '⚠️ Ошибка загрузки курса';
+                }
+                // Fallback price
+                btcPriceUSD = 100000;
+                return btcPriceUSD;
+            }
+        }
+
+        // Calculate BTC amount from USD
+        function calculateBTC(usdAmount) {
+            if (!btcPriceUSD || btcPriceUSD <= 0) return 0;
+            return (usdAmount / btcPriceUSD);
+        }
+
+        // Format BTC to 8 decimal places
+        function formatBTC(btcAmount) {
+            return btcAmount.toFixed(8);
+        }
+
+        // Verify TX hash via our backend (bypasses CORS)
+        async function verifyTXHash(txHash) {
+            const statusDiv = document.getElementById('tx-verify-status');
+            const submitBtn = document.getElementById('submit-deposit-btn');
+            
+            if (!txHash || txHash.trim().length < 64) {
+                statusDiv.style.display = 'block';
+                statusDiv.innerHTML = '<p style="color: #ffd700; font-size: 0.85rem;">⏳ Введите полный TX Hash (64 символа)</p>';
+                submitBtn.disabled = true;
+                return false;
+            }
+
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<p style="color: #00fff7; font-size: 0.85rem;">🔍 Проверка транзакции в блокчейне Bitcoin...</p>';
+
+            try {
+                const res = await fetch(`/api/verify-tx/${txHash}`);
+                const data = await res.json();
+
+                if (!data.found) {
+                    statusDiv.innerHTML = '<p style="color: #e94560; font-size: 0.85rem;">❌ TX Hash не найден в блокчейне. Проверьте правильность хеша.</p>';
+                    submitBtn.disabled = true;
+                    btcVerified = false;
+                    return false;
+                }
+
+                if (!data.sentToUs) {
+                    statusDiv.innerHTML = `<p style="color: #ffd700; font-size: 0.85rem;">⚠️ Транзакция найдена, но BTC отправлены не на наш адрес. Отправьте на: <strong style="color: #f7931a;">364MXZqZRGd8Bsnkssv93S2qd4WL5mZc5U</strong></p>`;
+                    submitBtn.disabled = true;
+                    btcVerified = false;
+                    return false;
+                }
+
+                if (!data.verified) {
+                    statusDiv.innerHTML = `<p style="color: #ffd700; font-size: 0.85rem;">⏳ ${data.message} (0 подтверждений — ждём)</p>`;
+                    submitBtn.disabled = true;
+                    btcVerified = false;
+                    return false;
+                }
+
+                // Fully verified!
+                btcVerified = true;
+                statusDiv.innerHTML = `<p style="color: #00fff7; font-size: 0.85rem;">✅ ${data.message}</p>`;
+                submitBtn.disabled = false;
+                return true;
+
+            } catch (err) {
+                statusDiv.innerHTML = '<p style="color: #e94560; font-size: 0.85rem;">❌ Ошибка проверки блокчейна. Попробуйте позже.</p>';
+                submitBtn.disabled = true;
+                btcVerified = false;
+                return false;
+            }
+        }
+
+        // Auto-fill BTC amount when USD amount changes
+        function setupDepositAutoCalc() {
+            const usdInput = document.getElementById('deposit-amount');
+            const btcDisplay = document.getElementById('btc-calculated');
+            const btcAmountDisplay = document.getElementById('btc-amount-display');
+            const txInput = document.getElementById('tx-hash');
+            const submitBtn = document.getElementById('submit-deposit-btn');
+
+            if (usdInput && btcDisplay && btcAmountDisplay) {
+                usdInput.addEventListener('input', function() {
+                    const usdAmount = parseFloat(this.value);
+                    
+                    if (usdAmount >= 100 && btcPriceUSD > 0) {
+                        const btcAmount = calculateBTC(usdAmount);
+                        btcDisplay.style.display = 'block';
+                        btcAmountDisplay.textContent = formatBTC(btcAmount) + ' BTC';
+                    } else {
+                        btcDisplay.style.display = 'none';
+                    }
+                });
+            }
+
+            // Verify TX hash when user types
+            if (txInput) {
+                let verifyTimeout;
+                txInput.addEventListener('input', function() {
+                    clearTimeout(verifyTimeout);
+                    const txHash = this.value.trim();
+                    
+                    if (txHash.length >= 64) {
+                        verifyTimeout = setTimeout(() => {
+                            verifyTXHash(txHash);
+                        }, 1500); // Debounce 1.5s
+                    } else {
+                        const statusDiv = document.getElementById('tx-verify-status');
+                        if (statusDiv) {
+                            statusDiv.style.display = 'block';
+                            statusDiv.innerHTML = '<p style="color: #ffd700; font-size: 0.85rem;">⏳ Введите полный TX Hash (64 символа)</p>';
+                        }
+                        submitBtn.disabled = true;
+                        btcVerified = false;
+                    }
+                });
+            }
+        }
+
+        // Dashboard-specific functions
+        function copyReferral() {
+            const code = document.getElementById('referral-code').textContent;
+            if (code && code !== 'N/A') {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('Реферальный код скопирован: ' + code);
+                });
+            }
+        }
+
+        function copyWallet() {
+            const address = document.querySelector('.wallet-address').textContent;
+            navigator.clipboard.writeText(address).then(() => {
+                alert('Адрес кошелька скопирован');
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fetch BTC price immediately
+            fetchBTCPrice();
+            
+            // Setup auto-calculation
+            setupDepositAutoCalc();
+
+            // Deposit form handler
+            const depositForm = document.getElementById('deposit-form');
+            if (depositForm) {
+                depositForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    
+                    if (!btcVerified) {
+                        document.getElementById('deposit-msg').style.color = '#e94560';
+                        document.getElementById('deposit-msg').textContent = '❌ Сначала подтвердите TX Hash в блокчейне';
+                        return;
+                    }
+
+                    const amount = parseFloat(document.getElementById('deposit-amount').value);
+                    const plan = document.getElementById('deposit-plan').value;
+                    const txHash = document.getElementById('tx-hash').value;
+
+                    try {
+                        const res = await fetch('/api/invest', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                userId: currentUser.id,
+                                planName: plan,
+                                amount: amount,
+                                txHash: txHash
+                            })
+                        });
+                        const data = await res.json();
+                        
+                        if (res.ok) {
+                            document.getElementById('deposit-msg').style.color = '#00fff7';
+                            document.getElementById('deposit-msg').textContent = '✅ ' + data.message;
+                            setTimeout(() => {
+                                closeModal('deposit-modal');
+                                loadDashboard();
+                            }, 1500);
+                        } else {
+                            document.getElementById('deposit-msg').style.color = '#e94560';
+                            document.getElementById('deposit-msg').textContent = '❌ ' + data.error;
+                        }
+                    } catch (err) {
+                        document.getElementById('deposit-msg').style.color = '#e94560';
+                        document.getElementById('deposit-msg').textContent = '❌ Ошибка соединения';
+                    }
+                };
+            }
+
+            // Withdraw form handler
+            const withdrawForm = document.getElementById('withdraw-form');
+            if (withdrawForm) {
+                withdrawForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const amount = parseFloat(document.getElementById('withdraw-amount').value);
+                    const wallet = document.getElementById('withdraw-wallet').value;
+
+                    try {
+                        const res = await fetch('/api/withdraw', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                userId: currentUser.id,
+                                amount: amount,
+                                wallet: wallet
+                            })
+                        });
+                        const data = await res.json();
+                        
+                        if (res.ok) {
+                            document.getElementById('withdraw-msg').style.color = '#00fff7';
+                            document.getElementById('withdraw-msg').textContent = '✅ ' + data.message;
+                            setTimeout(() => {
+                                closeModal('withdraw-modal');
+                                loadDashboard();
+                            }, 1500);
+                        } else {
+                            document.getElementById('withdraw-msg').style.color = '#e94560';
+                            document.getElementById('withdraw-msg').textContent = '❌ ' + data.error;
+                        }
+                    } catch (err) {
+                        document.getElementById('withdraw-msg').style.color = '#e94560';
+                        document.getElementById('withdraw-msg').textContent = '❌ Ошибка соединения';
+                    }
+                };
+            }
+        });
+    </script>
+</body>
+</html>

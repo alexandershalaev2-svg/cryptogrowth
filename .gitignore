@@ -1,0 +1,4 @@
+node_modules/
+crypto_growth.db
+.env
+*.log

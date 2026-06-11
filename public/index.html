@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoGrowth Protocol | Умный Майнинг</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo">CryptoGrowth</div>
+        <nav>
+            <a href="#plans">Планы</a>
+            <a href="#about">О проекте</a>
+            <a href="#" onclick="showLogin(); return false;">Войти</a>
+        </nav>
+        <button class="btn-primary" onclick="showRegister()">Начать зарабатывать</button>
+    </header>
+
+    <section class="hero">
+        <h1>Зарабатывайте до <span class="highlight">1.2% в день</span></h1>
+        <p>Вносите BTC для старта — все депозиты и выплаты в Bitcoin.</p>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <h3>$1,240,592</h3>
+                <p>Выплачено</p>
+            </div>
+            <div class="stat-box">
+                <h3>8,432</h3>
+                <p>Инвесторов</p>
+            </div>
+            <div class="stat-box">
+                <h3>$45M+</h3>
+                <p>В обороте</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="plans" class="plans-section">
+        <h2>Выберите план инвестирования</h2>
+        <div class="plans-container">
+            <!-- Starter -->
+            <div class="plan-card">
+                <h3>Starter</h3>
+                <p class="profit">0.3% в день</p>
+                <p class="min">Мин. депозит: $100</p>
+                <p class="term">Срок: 30 дней</p>
+                <button class="btn-primary invest-btn" onclick="showRegister()">Старт</button>
+            </div>
+            <!-- Pro -->
+            <div class="plan-card featured">
+                <div class="badge">POPULAR</div>
+                <h3>Pro Trader</h3>
+                <p class="profit">0.7% в день</p>
+                <p class="min">Мин. депозит: $500</p>
+                <p class="term">Срок: 60 дней</p>
+                <button class="btn-primary invest-btn" onclick="showRegister()">Инвестировать</button>
+            </div>
+            <!-- VIP -->
+            <div class="plan-card">
+                <h3>VIP Whale</h3>
+                <p class="profit">1.2% в день</p>
+                <p class="min">Мин. депозит: $5,000</p>
+                <p class="term">Срок: 90 дней</p>
+                <button class="btn-primary invest-btn" onclick="showRegister()">Войти в VIP</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="plans-section" style="background: #0d0d2b;">
+        <h2>О проекте CryptoGrowth</h2>
+        <div style="max-width: 800px; margin: 0 auto; color: #a0a0c0; line-height: 1.8;">
+            <p>CryptoGrowth Protocol — платформа для пассивного заработка в Bitcoin. Вносите BTC, получайте ежедневную прибыль в BTC, выводите на свой кошелёк.</p>
+            <br>
+            <p>Мы объединяем силы сообщества через реферальную программу: получайте 10% от BTC-депозита каждого приглашенного инвестора.</p>
+            <br>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 10px;">✅ Начисление прибыли в BTC каждый час</li>
+                <li style="margin-bottom: 10px;">✅ Прозрачные планы с фиксированным сроком</li>
+                <li style="margin-bottom: 10px;">✅ Реферальная программа — 10% от BTC-депозита</li>
+                <li style="margin-bottom: 10px;">✅ Вывод BTC на любой кошелёк</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer style="text-align: center; padding: 30px; background: #0d0d2b; border-top: 1px solid rgba(0,255,247,0.1); color: #a0a0c0;">
+        <p>&copy; 2026 CryptoGrowth Protocol. Все права защищены.</p>
+    </footer>
+
+    <!-- Modal Registration/Login -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title">Регистрация</h2>
+            <form id="auth-form">
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Пароль" required>
+                <input type="text" id="referral" placeholder="Реферальный код (необязательно)">
+                <button type="submit" class="btn-primary full-width" id="auth-btn">Создать аккаунт</button>
+            </form>
+            <p id="auth-msg"></p>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
