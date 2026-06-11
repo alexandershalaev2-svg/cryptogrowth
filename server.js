@@ -327,8 +327,14 @@ app.get('/api/verify-tx/:txHash', async (req, res) => {
     }
 });
 
-// 9. Analytics API (admin only)
+// 9. Analytics API (admin only, password protected)
+const ADMIN_PASSWORD = 'crypto2026';
+
 app.get('/api/analytics', (req, res) => {
+    const authHeader = req.headers['x-admin-password'];
+    if (!authHeader || authHeader !== ADMIN_PASSWORD) {
+        return res.status(401).json({ error: 'Доступ запрещён. Нужен пароль.' });
+    }
     const result = {};
     
     // Total visits
