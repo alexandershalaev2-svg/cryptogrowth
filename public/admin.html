@@ -212,8 +212,7 @@
         </div>
     </div>
     
-    <canvas id="moneyCanvas"></canvas>
-    <div class="money-rain-container" id="moneyRain"></div>
+    <!-- Clean background for analytics - no money rain -->
     
     <div class="admin-content" id="admin-content">
         <div class="admin-container">
@@ -327,111 +326,6 @@
         // Auto-refresh every 30 seconds
         loadAnalytics();
         setInterval(loadAnalytics, 30000);
-    </script>
-    
-    <!-- Money Rain Animation -->
-    <script>
-    (function() {
-        const symbols = ['💰', '💵', '💸', '🤑', '💎', '₿', 'Ξ', '💲', '🪙', '💹', '📈', '🚀'];
-        const colors = ['#ffd700', '#f7931a', '#00fff7', '#e94560', '#00ff00', '#ff6b6b', '#a855f7'];
-        const container = document.getElementById('moneyRain');
-        
-        function createMoneySymbol() {
-            const el = document.createElement('div');
-            el.className = 'money-symbol';
-            el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-            el.style.left = Math.random() * 100 + '%';
-            el.style.fontSize = (24 + Math.random() * 32) + 'px';
-            el.style.color = colors[Math.floor(Math.random() * colors.length)];
-            el.style.animationDuration = (5 + Math.random() * 6) + 's, 1.5s';
-            el.style.animationDelay = '0s';
-            el.style.opacity = '0.8';
-            container.appendChild(el);
-            
-            setTimeout(() => el.remove(), 12000);
-        }
-        
-        for (let i = 0; i < 30; i++) {
-            setTimeout(createMoneySymbol, i * 150);
-        }
-        
-        setInterval(createMoneySymbol, 400);
-    })();
-    
-    // Canvas particle background
-    (function() {
-        const canvas = document.getElementById('moneyCanvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resize();
-        window.addEventListener('resize', resize);
-        
-        const particles = [];
-        const particleCount = 100;
-        
-        class Particle {
-            constructor() {
-                this.reset();
-            }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 3 + 1;
-                this.speedX = (Math.random() - 0.5) * 1;
-                this.speedY = (Math.random() - 0.5) * 1;
-                this.opacity = Math.random() * 0.6 + 0.3;
-                this.hue = Math.random() * 60 + 170;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-                    this.reset();
-                }
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${this.hue}, 100%, 70%, ${this.opacity})`;
-                ctx.fill();
-            }
-        }
-        
-        for (let i = 0; i < particleCount; i++) {
-            particles.push(new Particle());
-        }
-        
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 120) {
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(0, 255, 247, ${0.15 * (1 - dist / 120)})`;
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animate);
-        }
-        animate();
-    })();
     </script>
 </body>
 </html>
