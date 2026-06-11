@@ -8,9 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Animated Money/Crypto Background -->
+    <!-- Canvas Particle Background Only -->
     <canvas id="moneyCanvas"></canvas>
-    <div class="money-rain-container" id="moneyRain"></div>
 
     <header>
         <div class="logo">CryptoGrowth</div>
@@ -28,15 +27,15 @@
         
         <div class="stats">
             <div class="stat-box">
-                <h3>$1,240,592</h3>
+                <h3>$300,000</h3>
                 <p>Выплачено</p>
             </div>
             <div class="stat-box">
-                <h3>8,432</h3>
+                <h3>1,247</h3>
                 <p>Инвесторов</p>
             </div>
             <div class="stat-box">
-                <h3>$45M+</h3>
+                <h3>$1.8M+</h3>
                 <p>В обороте</p>
             </div>
         </div>
@@ -113,39 +112,9 @@
     <script src="/js/payouts.js"></script>
     <script src="/js/chat.js"></script>
     
-    <!-- Money Rain Animation -->
+    <!-- Canvas Particle Background -->
     <script>
-    (function() {
-        const symbols = ['💰', '💵', '💸', '🤑', '💎', '₿', 'Ξ', '💲', '🪙', '💹', '📈', '🚀'];
-        const colors = ['#ffd700', '#f7931a', '#00fff7', '#e94560', '#00ff00', '#ff6b6b', '#a855f7'];
-        const container = document.getElementById('moneyRain');
-        
-        function createMoneySymbol() {
-            const el = document.createElement('div');
-            el.className = 'money-symbol';
-            el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-            el.style.left = Math.random() * 100 + '%';
-            el.style.fontSize = (24 + Math.random() * 32) + 'px';
-            el.style.color = colors[Math.floor(Math.random() * colors.length)];
-            el.style.animationDuration = (5 + Math.random() * 6) + 's, 1.5s';
-            el.style.animationDelay = '0s';
-            el.style.opacity = '0.8';
-            container.appendChild(el);
-            
-            setTimeout(() => el.remove(), 12000);
-        }
-        
-        // Create initial batch - more symbols
-        for (let i = 0; i < 30; i++) {
-            setTimeout(createMoneySymbol, i * 150);
-        }
-        
-        // Keep creating symbols more frequently
-        setInterval(createMoneySymbol, 400);
-    })();
-    
-    // Canvas particle background
-    (function() {
+    document.addEventListener('DOMContentLoaded', function() {
         const canvas = document.getElementById('moneyCanvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
@@ -158,27 +127,23 @@
         window.addEventListener('resize', resize);
         
         const particles = [];
-        const particleCount = 100;
+        const particleCount = 80;
         
         class Particle {
-            constructor() {
-                this.reset();
-            }
+            constructor() { this.reset(); }
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 3 + 1;
-                this.speedX = (Math.random() - 0.5) * 1;
-                this.speedY = (Math.random() - 0.5) * 1;
-                this.opacity = Math.random() * 0.6 + 0.3;
-                this.hue = Math.random() * 60 + 170; // cyan to blue range
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.opacity = Math.random() * 0.4 + 0.1;
+                this.hue = Math.random() * 60 + 170;
             }
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
-                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-                    this.reset();
-                }
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
             }
             draw() {
                 ctx.beginPath();
@@ -188,18 +153,11 @@
             }
         }
         
-        for (let i = 0; i < particleCount; i++) {
-            particles.push(new Particle());
-        }
+        for (let i = 0; i < particleCount; i++) particles.push(new Particle());
         
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            
-            // Draw connections
+            particles.forEach(p => { p.update(); p.draw(); });
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x;
@@ -209,8 +167,8 @@
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(0, 255, 247, ${0.15 * (1 - dist / 120)})`;
-                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = `rgba(0, 255, 247, ${0.08 * (1 - dist / 120)})`;
+                        ctx.lineWidth = 0.5;
                         ctx.stroke();
                     }
                 }
@@ -218,7 +176,7 @@
             requestAnimationFrame(animate);
         }
         animate();
-    })();
+    });
     </script>
 </body>
 </html>
