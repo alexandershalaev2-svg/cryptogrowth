@@ -10,6 +10,126 @@ body {
     background-color: #0a0a1a;
     color: #e0e0e0;
     min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ===== ANIMATED MONEY/CRYPTO BACKGROUND ===== */
+.money-rain-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.money-rain-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(ellipse at 20% 50%, rgba(0, 255, 247, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(247, 147, 26, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(233, 69, 96, 0.03) 0%, transparent 50%);
+    animation: bgPulse 8s ease-in-out infinite;
+}
+
+@keyframes bgPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+.money-symbol {
+    position: absolute;
+    top: -60px;
+    font-size: 24px;
+    opacity: 0;
+    animation: moneyRain linear infinite, shimmer 2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+    text-shadow: 0 0 10px currentColor;
+}
+
+@keyframes moneyRain {
+    0% {
+        transform: translateY(-60px) rotate(0deg) scale(0.5);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    90% {
+        opacity: 0.4;
+    }
+    100% {
+        transform: translateY(110vh) rotate(720deg) scale(1.2);
+        opacity: 0;
+    }
+}
+
+@keyframes shimmer {
+    0%, 100% {
+        filter: hue-rotate(0deg) brightness(1);
+    }
+    50% {
+        filter: hue-rotate(60deg) brightness(1.5);
+    }
+}
+
+/* Rainbow gradient text effect for highlights */
+.rainbow-text {
+    background: linear-gradient(90deg, #00fff7, #ffd700, #f7931a, #e94560, #00fff7);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbowShift 3s linear infinite;
+}
+
+@keyframes rainbowShift {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+/* Glow pulse effect */
+.glow-pulse {
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        text-shadow: 0 0 10px rgba(0, 255, 247, 0.5), 0 0 20px rgba(0, 255, 247, 0.3);
+    }
+    50% {
+        text-shadow: 0 0 20px rgba(0, 255, 247, 0.8), 0 0 40px rgba(0, 255, 247, 0.5), 0 0 60px rgba(0, 255, 247, 0.3);
+    }
+}
+
+/* Money sparkle effect */
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #ffd700;
+    animation: sparkleAnim 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes sparkleAnim {
+    0%, 100% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1) rotate(180deg);
+        opacity: 1;
+    }
 }
 
 /* ===== HEADER ===== */
@@ -807,6 +927,24 @@ nav a:hover {
 #chat-send-btn:hover {
     transform: scale(1.1);
     box-shadow: 0 4px 15px rgba(0, 255, 247, 0.4);
+}
+
+/* ===== ANIMATED BACKGROUND CANVAS ===== */
+#moneyCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+/* Ensure content stays above background */
+header, .hero, .plans-section, .dashboard-container, .payouts-container {
+    position: relative;
+    z-index: 1;
 }
 
 /* ===== RESPONSIVE ===== */

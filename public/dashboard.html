@@ -8,6 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Animated Money/Crypto Background -->
+    <canvas id="moneyCanvas"></canvas>
+    <div class="money-rain-container" id="moneyRain"></div>
+
     <header>
         <div class="logo">CryptoGrowth</div>
         <div class="user-info">
@@ -364,6 +368,110 @@
                 };
             }
         });
+    </script>
+    
+    <!-- Money Rain Animation -->
+    <script>
+    (function() {
+        const symbols = ['💰', '💵', '💸', '🤑', '💎', '₿', 'Ξ', '💲', '🪙', '💹', '📈', '🚀'];
+        const colors = ['#ffd700', '#f7931a', '#00fff7', '#e94560', '#00ff00', '#ff6b6b', '#a855f7'];
+        const container = document.getElementById('moneyRain');
+        
+        function createMoneySymbol() {
+            const el = document.createElement('div');
+            el.className = 'money-symbol';
+            el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            el.style.left = Math.random() * 100 + '%';
+            el.style.fontSize = (16 + Math.random() * 24) + 'px';
+            el.style.color = colors[Math.floor(Math.random() * colors.length)];
+            el.style.animationDuration = (6 + Math.random() * 8) + 's, 2s';
+            el.style.animationDelay = Math.random() * 2 + 's';
+            container.appendChild(el);
+            
+            setTimeout(() => el.remove(), 16000);
+        }
+        
+        for (let i = 0; i < 15; i++) {
+            setTimeout(createMoneySymbol, i * 300);
+        }
+        
+        setInterval(createMoneySymbol, 800);
+    })();
+    
+    // Canvas particle background
+    (function() {
+        const canvas = document.getElementById('moneyCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        
+        const particles = [];
+        const particleCount = 50;
+        
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.opacity = Math.random() * 0.5 + 0.1;
+                this.hue = Math.random() * 60 + 170;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${this.hue}, 100%, 70%, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+        
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(0, 255, 247, ${0.05 * (1 - dist / 120)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+    })();
     </script>
 </body>
 </html>
