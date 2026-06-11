@@ -47,12 +47,13 @@ body {
 .money-symbol {
     position: absolute;
     top: -60px;
-    font-size: 24px;
+    font-size: 28px;
     opacity: 0;
     animation: moneyRain linear infinite, shimmer 2s ease-in-out infinite;
     pointer-events: none;
     z-index: 0;
-    text-shadow: 0 0 10px currentColor;
+    text-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
+    filter: drop-shadow(0 0 8px currentColor);
 }
 
 @keyframes moneyRain {
@@ -938,7 +939,7 @@ nav a:hover {
     height: 100%;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.4;
+    opacity: 0.8;
 }
 
 /* Ensure content stays above background */

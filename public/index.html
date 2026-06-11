@@ -124,22 +124,23 @@
             el.className = 'money-symbol';
             el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
             el.style.left = Math.random() * 100 + '%';
-            el.style.fontSize = (16 + Math.random() * 24) + 'px';
+            el.style.fontSize = (24 + Math.random() * 32) + 'px';
             el.style.color = colors[Math.floor(Math.random() * colors.length)];
-            el.style.animationDuration = (6 + Math.random() * 8) + 's, 2s';
-            el.style.animationDelay = Math.random() * 2 + 's';
+            el.style.animationDuration = (5 + Math.random() * 6) + 's, 1.5s';
+            el.style.animationDelay = '0s';
+            el.style.opacity = '0.8';
             container.appendChild(el);
             
-            setTimeout(() => el.remove(), 16000);
+            setTimeout(() => el.remove(), 12000);
         }
         
-        // Create initial batch
-        for (let i = 0; i < 15; i++) {
-            setTimeout(createMoneySymbol, i * 300);
+        // Create initial batch - more symbols
+        for (let i = 0; i < 30; i++) {
+            setTimeout(createMoneySymbol, i * 150);
         }
         
-        // Keep creating symbols
-        setInterval(createMoneySymbol, 800);
+        // Keep creating symbols more frequently
+        setInterval(createMoneySymbol, 400);
     })();
     
     // Canvas particle background
@@ -156,7 +157,7 @@
         window.addEventListener('resize', resize);
         
         const particles = [];
-        const particleCount = 50;
+        const particleCount = 100;
         
         class Particle {
             constructor() {
@@ -165,10 +166,10 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.speedX = (Math.random() - 0.5) * 0.5;
-                this.speedY = (Math.random() - 0.5) * 0.5;
-                this.opacity = Math.random() * 0.5 + 0.1;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = (Math.random() - 0.5) * 1;
+                this.speedY = (Math.random() - 0.5) * 1;
+                this.opacity = Math.random() * 0.6 + 0.3;
                 this.hue = Math.random() * 60 + 170; // cyan to blue range
             }
             update() {
@@ -207,8 +208,8 @@
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(0, 255, 247, ${0.05 * (1 - dist / 120)})`;
-                        ctx.lineWidth = 0.5;
+                        ctx.strokeStyle = `rgba(0, 255, 247, ${0.15 * (1 - dist / 120)})`;
+                        ctx.lineWidth = 1;
                         ctx.stroke();
                     }
                 }
