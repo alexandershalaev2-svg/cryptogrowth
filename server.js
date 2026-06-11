@@ -46,6 +46,16 @@ db.serialize(() => {
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )`);
     
+    // Таблица аналитики
+    db.run(`CREATE TABLE IF NOT EXISTS analytics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT,
+        ip TEXT,
+        user_agent TEXT,
+        page TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+    
     // Админ аккаунт (email: admin@crypto.com, pass: admin123)
     const adminPass = bcrypt.hashSync('admin123', 10);
     db.run(
@@ -57,6 +67,25 @@ db.serialize(() => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// --- TRACK VISITS & REGISTRATIONS ---
+function trackVisit(req, page) {
+    const ip = req.ip || req.connection.remoteAddress;
+    const userAgent = req.headers['user-agent'] || '';
+    db.run(
+        "INSERT INTO analytics (type, ip, user_agent, page) VALUES (?, ?, ?, ?)",
+        ['visit', ip, userAgent.substring(0, 500), page]
+    );
+}
+
+// Track every page visit
+app.use((req, res, next) => {
+    if (req.path.startsWith('/api/') || req.path.startsWith('/css/') || req.path.startsWith('/js/')) {
+        return next();
+    }
+    trackVisit(req, req.path);
+    next();
+});
 
 // --- API ENDPOINTS ---
 
@@ -296,6 +325,64 @@ app.get('/api/verify-tx/:txHash', async (req, res) => {
     } catch (err) {
         res.json({ found: false, message: 'Ошибка проверки блокчейна' });
     }
+});
+
+// 9. Analytics API (admin only)
+app.get('/api/analytics', (req, res) => {
+    const result = {};
+    
+    // Total visits
+    db.get("SELECT COUNT(*) as count FROM analytics WHERE type = 'visit'", [], (err, row) => {
+        result.totalVisits = row ? row.count : 0;
+        
+        // Total registrations
+        db.get("SELECT COUNT(*) as count FROM analytics WHERE type = 'register'", [], (err, row) => {
+            result.totalRegistrations = row ? row.count : 0;
+            
+            // Unique visitors (unique IPs)
+            db.get("SELECT COUNT(DISTINCT ip) as count FROM analytics WHERE type = 'visit'", [], (err, row) => {
+                result.uniqueVisitors = row ? row.count : 0;
+                
+                // Registrations today
+                db.get("SELECT COUNT(*) as count FROM analytics WHERE type = 'register' AND created_at >= datetime('now', '-1 day')", [], (err, row) => {
+                    result.registrationsToday = row ? row.count : 0;
+                    
+                    // Visits today
+                    db.get("SELECT COUNT(*) as count FROM analytics WHERE type = 'visit' AND created_at >= datetime('now', '-1 day')", [], (err, row) => {
+                        result.visitsToday = row ? row.count : 0;
+                        
+                        // New users count (from users table)
+                        db.get("SELECT COUNT(*) as count FROM users", [], (err, row) => {
+                            result.totalUsers = row ? row.count : 0;
+                            
+                            // Active investments
+                            db.get("SELECT COUNT(*) as count FROM investments WHERE status = 'active'", [], (err, row) => {
+                                result.activeInvestments = row ? row.count : 0;
+                                
+                                // Total deposited
+                                db.get("SELECT COALESCE(SUM(amount), 0) as sum FROM investments", [], (err, row) => {
+                                    result.totalDeposited = row ? row.sum : 0;
+                                    
+                                    // Total withdrawn
+                                    db.get("SELECT COALESCE(SUM(amount), 0) as sum FROM transactions WHERE type = 'withdraw'", [], (err, row) => {
+                                        result.totalWithdrawn = row ? row.sum : 0;
+                                        
+                                        // Recent registrations (last 10)
+                                        db.all(
+                                            "SELECT u.email, u.balance, a.created_at FROM analytics a JOIN users u ON u.id = (SELECT id FROM users WHERE referral_code = (SELECT referral_code FROM analytics WHERE type = 'register' ORDER BY id DESC LIMIT 1)) WHERE a.type = 'register' ORDER BY a.created_at DESC LIMIT 10",
+                                            [], (err) => {
+                                                res.json(result);
+                                            }
+                                        );
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
 });
 
 const PORT = 3000;

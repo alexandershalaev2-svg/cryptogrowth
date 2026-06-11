@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналитика | CryptoGrowth</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .admin-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #00fff7;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .admin-header p {
+            color: #a0a0c0;
+        }
+        
+        .stats-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .admin-stat-card {
+            background: linear-gradient(135deg, #1a1a3e 0%, #0d0d2b 100%);
+            border: 1px solid rgba(0, 255, 247, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .admin-stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 255, 247, 0.2);
+        }
+        
+        .admin-stat-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .admin-stat-card .value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .admin-stat-card .label {
+            color: #a0a0c0;
+            font-size: 0.95rem;
+        }
+        
+        .stat-visits .value { color: #00fff7; }
+        .stat-users .value { color: #ffd700; }
+        .stat-registrations .value { color: #00ff00; }
+        .stat-investments .value { color: #f7931a; }
+        .stat-deposited .value { color: #e94560; }
+        .stat-withdrawn .value { color: #a855f7; }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            color: #00fff7;
+            font-size: 1.3rem;
+            margin: 30px 0 20px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #00fff7;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #a0a0c0;
+            font-size: 1.2rem;
+        }
+        
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="moneyCanvas"></canvas>
+    <div class="money-rain-container" id="moneyRain"></div>
+    
+    <div class="admin-container">
+        <a href="/" class="back-link">← Назад на сайт</a>
+        
+        <div class="admin-header">
+            <h1>📊 Аналитика CryptoGrowth</h1>
+            <p>Статистика сайта в реальном времени</p>
+        </div>
+        
+        <div id="stats-dashboard" class="stats-dashboard">
+            <div class="loading">Загрузка данных</div>
+        </div>
+    </div>
+    
+    <script src="/js/payouts.js"></script>
+    <script src="/js/chat.js"></script>
+    
+    <script>
+        // Fetch analytics
+        async function loadAnalytics() {
+            try {
+                const res = await fetch('/api/analytics');
+                const data = await res.json();
+                
+                const dashboard = document.getElementById('stats-dashboard');
+                dashboard.innerHTML = `
+                    <div class="admin-stat-card stat-visits">
+                        <div class="icon">👁️</div>
+                        <div class="value">${data.totalVisits || 0}</div>
+                        <div class="label">Всего посещений</div>
+                    </div>
+                    <div class="admin-stat-card stat-users">
+                        <div class="icon">👥</div>
+                        <div class="value">${data.uniqueVisitors || 0}</div>
+                        <div class="label">Уникальных посетителей</div>
+                    </div>
+                    <div class="admin-stat-card stat-registrations">
+                        <div class="icon">📝</div>
+                        <div class="value">${data.totalRegistrations || 0}</div>
+                        <div class="label">Всего регистраций</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="icon">📅</div>
+                        <div class="value">${data.registrationsToday || 0}</div>
+                        <div class="label">Регистраций сегодня</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="icon">🌐</div>
+                        <div class="value">${data.visitsToday || 0}</div>
+                        <div class="label">Посещений сегодня</div>
+                    </div>
+                    <div class="admin-stat-card stat-users">
+                        <div class="icon">👤</div>
+                        <div class="value">${data.totalUsers || 0}</div>
+                        <div class="label">Всего пользователей</div>
+                    </div>
+                    <div class="admin-stat-card stat-investments">
+                        <div class="icon">💼</div>
+                        <div class="value">${data.activeInvestments || 0}</div>
+                        <div class="label">Активных инвестиций</div>
+                    </div>
+                    <div class="admin-stat-card stat-deposited">
+                        <div class="icon">💰</div>
+                        <div class="value">$${(data.totalDeposited || 0).toLocaleString()}</div>
+                        <div class="label">Всего депозитов</div>
+                    </div>
+                    <div class="admin-stat-card stat-withdrawn">
+                        <div class="icon">💸</div>
+                        <div class="value">$${(data.totalWithdrawn || 0).toLocaleString()}</div>
+                        <div class="label">Всего выплат</div>
+                    </div>
+                `;
+            } catch (err) {
+                console.error('Failed to load analytics:', err);
+            }
+        }
+        
+        // Auto-refresh every 30 seconds
+        loadAnalytics();
+        setInterval(loadAnalytics, 30000);
+    </script>
+    
+    <!-- Money Rain Animation -->
+    <script>
+    (function() {
+        const symbols = ['💰', '💵', '💸', '🤑', '💎', '₿', 'Ξ', '💲', '🪙', '💹', '📈', '🚀'];
+        const colors = ['#ffd700', '#f7931a', '#00fff7', '#e94560', '#00ff00', '#ff6b6b', '#a855f7'];
+        const container = document.getElementById('moneyRain');
+        
+        function createMoneySymbol() {
+            const el = document.createElement('div');
+            el.className = 'money-symbol';
+            el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            el.style.left = Math.random() * 100 + '%';
+            el.style.fontSize = (24 + Math.random() * 32) + 'px';
+            el.style.color = colors[Math.floor(Math.random() * colors.length)];
+            el.style.animationDuration = (5 + Math.random() * 6) + 's, 1.5s';
+            el.style.animationDelay = '0s';
+            el.style.opacity = '0.8';
+            container.appendChild(el);
+            
+            setTimeout(() => el.remove(), 12000);
+        }
+        
+        for (let i = 0; i < 30; i++) {
+            setTimeout(createMoneySymbol, i * 150);
+        }
+        
+        setInterval(createMoneySymbol, 400);
+    })();
+    
+    // Canvas particle background
+    (function() {
+        const canvas = document.getElementById('moneyCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        
+        const particles = [];
+        const particleCount = 100;
+        
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = (Math.random() - 0.5) * 1;
+                this.speedY = (Math.random() - 0.5) * 1;
+                this.opacity = Math.random() * 0.6 + 0.3;
+                this.hue = Math.random() * 60 + 170;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${this.hue}, 100%, 70%, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+        
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(0, 255, 247, ${0.15 * (1 - dist / 120)})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+    })();
+    </script>
+</body>
+</html>
